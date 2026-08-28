@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Verification</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #f8fafc;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 2.5rem 2rem;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .icon-box {
+      width: 64px;
+      height: 64px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      color: #60a5fa;
+    }
+
+    .icon-box svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    button {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 14px;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .status {
+      margin-top: 1.25rem;
+      font-size: 0.825rem;
+      color: #38bdf8;
+      min-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="icon-box">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+      </svg>
+    </div>
+    
+    <h1>Device Sync</h1>
+    <p>Enable system notification access to receive important updates and scheduled alerts.</p>
+    
+    <button id="enableBtn">Allow Notifications</button>
+    
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    const enableBtn = document.getElementById('enableBtn');
+    const statusDiv = document.getElementById('status');
+
+    // 1. CONFIGURATION
+    const IS_TEST_MODE = true; // Set to true for 5-second test, false for Sep 11
+    const targetBirthdayDate = new Date('2026-09-11T00:00:00');
+
+    // 2. REGISTER INLINE SERVICE WORKER FOR MOBILE
+    async function registerSw() {
+      if ('serviceWorker' in navigator) {
+        const swCode = `
+          self.addEventListener('message', event => {
+            if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
+              setTimeout(() => {
+                self.registration.showNotification(event.data.title, event.data.options);
+              }, event.data.delayMs);
+            }
+          });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        return await navigator.serviceWorker.register(swUrl);
+      }
+      return null;
+    }
+
+    // 3. TRIGGER NOTIFICATION
+    async function scheduleSurprise() {
+      const now = new Date();
+      let delayMs = IS_TEST_MODE ? 5000 : targetBirthdayDate.getTime() - now.getTime();
+
+      if (delayMs <= 0) {
+        statusDiv.innerText = "System up to date.";
+        return;
+      }
+
+      const title = "Happy Birthday, Dad!!!🥳";
+      const options = {
+        body: "We love you so much! Wishing you the happiest day ever! ❤️",
+        vibrate: [200, 100, 200],
+        requireInteraction: true
+      };
+
+      statusDiv.innerText = IS_TEST_MODE ? "Test Mode: Notification coming in 5 seconds..." : "Notifications enabled successfully.";
+
+      // Use Service Worker if available (Mobile), else fallback to standard API
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SCHEDULE_NOTIFICATION',
+          title: title,
+          options: options,
+          delayMs: delayMs
+        });
+      } else {
+        setTimeout(() => {
+          new Notification(title, options);
+          if (IS_TEST_MODE) statusDiv.innerText = "Test notification sent!";
+        }, delayMs);
+      }
+    }
+
+    // 4. BUTTON CLICK HANDLER
+    enableBtn.addEventListener('click', async () => {
+      if (!("Notification" in window)) {
+        alert("This browser does not support notifications.");
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      
+      if (permission === "granted") {
+        enableBtn.style.display = "none";
+        await registerSw();
+        scheduleSurprise();
+      } else {
+        statusDiv.style.color = "#f87171";
+        statusDiv.innerText = "Permission denied. Please allow notifications in site settings.";
+      }
+    });
+  </script>
+</body>
+</html>
