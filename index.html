@@ -2,111 +2,165 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>System Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Surprised</title>
+  
+  <!-- Apple Mobile Web App Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Surprised">
+
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
-      background: #0f172a;
+      background-color: #f8fafc;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 20px;
-      color: #f8fafc;
-    }
-
-    .card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      padding: 2.5rem 2rem;
-      border-radius: 24px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      text-align: center;
-      max-width: 380px;
-      width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.08);
       position: relative;
       overflow: hidden;
     }
 
-    .card::before {
-      content: '';
+    /* Floating Colorful Circles Background */
+    .circle {
       position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 60%);
-      pointer-events: none;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.6;
+      z-index: 1;
+      animation: float 8s ease-in-out infinite alternate;
+    }
+
+    .circle-1 {
+      width: 280px;
+      height: 280px;
+      background: #ff7675;
+      top: -50px;
+      left: -50px;
+    }
+
+    .circle-2 {
+      width: 320px;
+      height: 320px;
+      background: #74b9ff;
+      bottom: -80px;
+      right: -50px;
+      animation-delay: -3s;
+    }
+
+    .circle-3 {
+      width: 220px;
+      height: 220px;
+      background: #55efc4;
+      top: 40%;
+      right: 10%;
+      animation-delay: -5s;
+    }
+
+    .circle-4 {
+      width: 250px;
+      height: 250px;
+      background: #a29bfe;
+      bottom: 20%;
+      left: 5%;
+      animation-delay: -2s;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-30px) scale(1.08); }
+    }
+
+    /* Card Container */
+    .card {
+      position: relative;
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 2.5rem 2rem;
+      border-radius: 28px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.8);
     }
 
     .icon-box {
-      width: 64px;
-      height: 64px;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.2);
+      width: 68px;
+      height: 68px;
+      background: rgba(108, 92, 231, 0.1);
       border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 1.5rem;
-      color: #60a5fa;
+      margin: 0 auto 1.25rem;
+      color: #6c5ce7;
     }
 
     .icon-box svg {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
     }
 
     h1 {
-      font-size: 1.35rem;
+      font-size: 1.5rem;
       font-weight: 700;
+      color: #2d3436;
       margin-bottom: 0.5rem;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.01em;
     }
 
     p {
-      font-size: 0.9rem;
-      color: #94a3b8;
-      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      color: #636e72;
+      margin-bottom: 1.75rem;
       line-height: 1.5;
     }
 
     button {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      background: linear-gradient(135deg, #0984e3, #6c5ce7);
       color: white;
       border: none;
-      padding: 14px 28px;
-      font-size: 0.95rem;
+      padding: 16px 28px;
+      font-size: 1rem;
       font-weight: 600;
-      border-radius: 14px;
+      border-radius: 18px;
       cursor: pointer;
       width: 100%;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 8px 20px rgba(9, 132, 227, 0.25);
     }
 
     button:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
 
     .status {
       margin-top: 1.25rem;
-      font-size: 0.825rem;
-      color: #38bdf8;
-      min-height: 1.2em;
+      font-size: 0.85rem;
+      color: #636e72;
+      font-weight: 500;
+      line-height: 1.4;
     }
   </style>
 </head>
 <body>
+
+  <!-- Background Circles -->
+  <div class="circle circle-1"></div>
+  <div class="circle circle-2"></div>
+  <div class="circle circle-3"></div>
+  <div class="circle circle-4"></div>
 
   <div class="card">
     <div class="icon-box">
@@ -115,23 +169,23 @@
       </svg>
     </div>
     
-    <h1>Device Sync</h1>
-    <p>Enable system notification access to receive important updates and scheduled alerts.</p>
+    <h1>Surprised</h1>
+    <p>Welcome to Surprised! Stay connected to receive special alerts and updates.</p>
     
     <button id="enableBtn">Allow Notifications</button>
     
-    <div id="status" class="status"></div>
+    <div id="status" class="status">allow notifications to get the updates and notifications from the app</div>
   </div>
 
   <script>
     const enableBtn = document.getElementById('enableBtn');
     const statusDiv = document.getElementById('status');
 
-    // 1. CONFIGURATION
-    const IS_TEST_MODE = true; // Set to true for 5-second test, false for Sep 11
+    // 1. SETTINGS
+    const IS_TEST_MODE = true; // Set to 'true' for 5-sec test, 'false' for Sep 11
     const targetBirthdayDate = new Date('2026-09-11T00:00:00');
 
-    // 2. REGISTER INLINE SERVICE WORKER FOR MOBILE
+    // 2. REGISTER INLINE SERVICE WORKER
     async function registerSw() {
       if ('serviceWorker' in navigator) {
         const swCode = `
@@ -150,26 +204,29 @@
       return null;
     }
 
-    // 3. TRIGGER NOTIFICATION
+    // 3. SCHEDULE SURPRISE
     async function scheduleSurprise() {
       const now = new Date();
       let delayMs = IS_TEST_MODE ? 5000 : targetBirthdayDate.getTime() - now.getTime();
 
       if (delayMs <= 0) {
-        statusDiv.innerText = "System up to date.";
+        statusDiv.innerText = "All notifications enabled!";
         return;
       }
 
       const title = "Happy Birthday, Dad!!!🥳";
       const options = {
         body: "We love you so much! Wishing you the happiest day ever! ❤️",
-        vibrate: [200, 100, 200],
-        requireInteraction: true
+        icon: "https://cdn-icons-png.flaticon.com/512/3159/3159422.png",
+        vibrate: [200, 100, 200]
       };
 
-      statusDiv.innerText = IS_TEST_MODE ? "Test Mode: Notification coming in 5 seconds..." : "Notifications enabled successfully.";
+      if (IS_TEST_MODE) {
+        statusDiv.innerText = "Test Mode: Notification coming in 5 seconds...";
+      } else {
+        statusDiv.innerText = "Notifications enabled successfully! You're all set.";
+      }
 
-      // Use Service Worker if available (Mobile), else fallback to standard API
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
           type: 'SCHEDULE_NOTIFICATION',
@@ -185,7 +242,7 @@
       }
     }
 
-    // 4. BUTTON CLICK HANDLER
+    // 4. BUTTON EVENT
     enableBtn.addEventListener('click', async () => {
       if (!("Notification" in window)) {
         alert("This browser does not support notifications.");
@@ -199,8 +256,8 @@
         await registerSw();
         scheduleSurprise();
       } else {
-        statusDiv.style.color = "#f87171";
-        statusDiv.innerText = "Permission denied. Please allow notifications in site settings.";
+        statusDiv.style.color = "#d63031";
+        statusDiv.innerText = "Please allow notifications in browser settings to continue.";
       }
     });
   </script>
