@@ -5,10 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Surprised</title>
   
-  <!-- Apple Mobile Web App Settings -->
+  <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Surprised">
+
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "6c50eea6-22e5-4449-9f71-98cf6d12f202",
+        safari_web_id: "web.onesignal.auto.6b31cc7e-8212-45ce-95eb-ed8c35d3e69c",
+        notifyButton: {
+          enable: false,
+        },
+      });
+    });
+  </script>
 
   <style>
     * {
@@ -29,7 +43,6 @@
       overflow: hidden;
     }
 
-    /* Floating Colorful Circles Background */
     .circle {
       position: absolute;
       border-radius: 50%;
@@ -39,47 +52,16 @@
       animation: float 8s ease-in-out infinite alternate;
     }
 
-    .circle-1 {
-      width: 280px;
-      height: 280px;
-      background: #ff7675;
-      top: -50px;
-      left: -50px;
-    }
-
-    .circle-2 {
-      width: 320px;
-      height: 320px;
-      background: #74b9ff;
-      bottom: -80px;
-      right: -50px;
-      animation-delay: -3s;
-    }
-
-    .circle-3 {
-      width: 220px;
-      height: 220px;
-      background: #55efc4;
-      top: 40%;
-      right: 10%;
-      animation-delay: -5s;
-    }
-
-    .circle-4 {
-      width: 250px;
-      height: 250px;
-      background: #a29bfe;
-      bottom: 20%;
-      left: 5%;
-      animation-delay: -2s;
-    }
+    .circle-1 { width: 280px; height: 280px; background: #ff7675; top: -50px; left: -50px; }
+    .circle-2 { width: 320px; height: 320px; background: #74b9ff; bottom: -80px; right: -50px; animation-delay: -3s; }
+    .circle-3 { width: 220px; height: 220px; background: #55efc4; top: 40%; right: 10%; animation-delay: -5s; }
+    .circle-4 { width: 250px; height: 250px; background: #a29bfe; bottom: 20%; left: 5%; animation-delay: -2s; }
 
     @keyframes float {
       0% { transform: translateY(0) scale(1); }
       100% { transform: translateY(-30px) scale(1.08); }
     }
 
-    /* Card Container */
     .card {
       position: relative;
       z-index: 2;
@@ -107,10 +89,7 @@
       color: #6c5ce7;
     }
 
-    .icon-box svg {
-      width: 34px;
-      height: 34px;
-    }
+    .icon-box svg { width: 34px; height: 34px; }
 
     h1 {
       font-size: 1.5rem;
@@ -141,9 +120,7 @@
       box-shadow: 0 8px 20px rgba(9, 132, 227, 0.25);
     }
 
-    button:active {
-      transform: scale(0.97);
-    }
+    button:active { transform: scale(0.97); }
 
     .status {
       margin-top: 1.25rem;
@@ -156,7 +133,6 @@
 </head>
 <body>
 
-  <!-- Background Circles -->
   <div class="circle circle-1"></div>
   <div class="circle circle-2"></div>
   <div class="circle circle-3"></div>
@@ -181,84 +157,16 @@
     const enableBtn = document.getElementById('enableBtn');
     const statusDiv = document.getElementById('status');
 
-    // 1. SETTINGS
-    const IS_TEST_MODE = true; // Set to 'true' for 5-sec test, 'false' for Sep 11
-    const targetBirthdayDate = new Date('2026-09-11T00:00:00');
-
-    // 2. REGISTER INLINE SERVICE WORKER
-    async function registerSw() {
-      if ('serviceWorker' in navigator) {
-        const swCode = `
-          self.addEventListener('message', event => {
-            if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
-              setTimeout(() => {
-                self.registration.showNotification(event.data.title, event.data.options);
-              }, event.data.delayMs);
-            }
-          });
-        `;
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(blob);
-        return await navigator.serviceWorker.register(swUrl);
-      }
-      return null;
-    }
-
-    // 3. SCHEDULE SURPRISE
-    async function scheduleSurprise() {
-      const now = new Date();
-      let delayMs = IS_TEST_MODE ? 5000 : targetBirthdayDate.getTime() - now.getTime();
-
-      if (delayMs <= 0) {
-        statusDiv.innerText = "All notifications enabled!";
-        return;
-      }
-
-      const title = "Happy Birthday, Dad!!!🥳";
-      const options = {
-        body: "We love you so much! Wishing you the happiest day ever! ❤️",
-        icon: "https://cdn-icons-png.flaticon.com/512/3159/3159422.png",
-        vibrate: [200, 100, 200]
-      };
-
-      if (IS_TEST_MODE) {
-        statusDiv.innerText = "Test Mode: Notification coming in 5 seconds...";
-      } else {
-        statusDiv.innerText = "Notifications enabled successfully! You're all set.";
-      }
-
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-          type: 'SCHEDULE_NOTIFICATION',
-          title: title,
-          options: options,
-          delayMs: delayMs
-        });
-      } else {
-        setTimeout(() => {
-          new Notification(title, options);
-          if (IS_TEST_MODE) statusDiv.innerText = "Test notification sent!";
-        }, delayMs);
-      }
-    }
-
-    // 4. BUTTON EVENT
-    enableBtn.addEventListener('click', async () => {
-      if (!("Notification" in window)) {
-        alert("This browser does not support notifications.");
-        return;
-      }
-
-      const permission = await Notification.requestPermission();
-      
-      if (permission === "granted") {
-        enableBtn.style.display = "none";
-        await registerSw();
-        scheduleSurprise();
-      } else {
-        statusDiv.style.color = "#d63031";
-        statusDiv.innerText = "Please allow notifications in browser settings to continue.";
-      }
+    enableBtn.addEventListener('click', () => {
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        try {
+          await OneSignal.Notifications.requestPermission();
+          enableBtn.style.display = 'none';
+          statusDiv.innerText = "Notifications enabled successfully! You're all set.";
+        } catch(e) {
+          statusDiv.innerText = "Error enabling notifications. Please try again.";
+        }
+      });
     });
   </script>
 </body>
