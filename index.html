@@ -129,6 +129,16 @@
       font-weight: 500;
       line-height: 1.4;
     }
+
+    .version-tag {
+      position: fixed;
+      bottom: 12px;
+      right: 16px;
+      font-size: 0.75rem;
+      color: #b2bec3;
+      font-weight: 600;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
@@ -153,18 +163,65 @@
     <div id="status" class="status">allow notifications to get the updates and notifications from the app</div>
   </div>
 
+  <div class="version-tag">v1.02</div>
+
   <script>
     const enableBtn = document.getElementById('enableBtn');
     const statusDiv = document.getElementById('status');
 
+    // TEST MODE TOGGLE
+    const IS_TEST_MODE = true; 
+
+    function triggerLocalNotification() {
+      const title = "Happy Birthday, Dad!!!🥳";
+      const options = {
+        body: "We love you so much! Wishing you the happiest day ever! ❤️",
+        icon: "https://cdn-icons-png.flaticon.com/512/3159/3159422.png"
+      };
+
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification(title, options);
+        });
+      } else {
+        new Notification(title, options);
+      }
+    }
+
     enableBtn.addEventListener('click', () => {
-      window.OneSignalDeferred.push(async function(OneSignal) {
-        try {
-          await OneSignal.Notifications.requestPermission();
+      // 1. First request standard browser permission
+      if (!("Notification" in window)) {
+        alert("This browser does not support notifications.");
+        return;
+      }
+
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
           enableBtn.style.display = 'none';
-          statusDiv.innerText = "Notifications enabled successfully! You're all set.";
-        } catch(e) {
-          statusDiv.innerText = "Error enabling notifications. Please try again.";
+
+          // 2. Register device with OneSignal SDK
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            try {
+              await OneSignal.Notifications.requestPermission();
+            } catch(e) {
+              console.log("OneSignal registration error:", e);
+            }
+          });
+
+          // 3. Handle Test Mode / Production status
+          if (IS_TEST_MODE) {
+            statusDiv.innerText = "Test Mode: Notification coming in 5 seconds...";
+            setTimeout(() => {
+              triggerLocalNotification();
+              statusDiv.innerText = "Test notification sent!";
+            }, 5000);
+          } else {
+            statusDiv.innerText = "Notifications enabled successfully! You're all set.";
+          }
+
+        } else {
+          statusDiv.style.color = "#d63031";
+          statusDiv.innerText = "Permission required to receive notifications.";
         }
       });
     });
