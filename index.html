@@ -163,14 +163,17 @@
     <div id="status" class="status">allow notifications to get the updates and notifications from the app</div>
   </div>
 
-  <div class="version-tag">v1.02</div>
+  <div class="version-tag">v1.04</div>
 
   <script>
     const enableBtn = document.getElementById('enableBtn');
     const statusDiv = document.getElementById('status');
 
-    // TEST MODE TOGGLE
-    const IS_TEST_MODE = true; 
+    // TEST MODE DISABLED -> Using actual scheduled timer
+    const IS_TEST_MODE = false; 
+    
+    // Set target date to today at 15:40 (3:40 PM) local time
+    const targetBirthdayDate = new Date('2026-08-29T15:40:00');
 
     function triggerLocalNotification() {
       const title = "Happy Birthday, Dad!!!🥳";
@@ -188,8 +191,24 @@
       }
     }
 
+    function startTimer() {
+      const now = new Date();
+      let delayMs = IS_TEST_MODE ? 5000 : targetBirthdayDate.getTime() - now.getTime();
+
+      if (delayMs <= 0 && !IS_TEST_MODE) {
+        statusDiv.innerText = "Time already passed! Reset target date.";
+        return;
+      }
+
+      statusDiv.innerText = "Notifications enabled successfully! You're all set.";
+
+      setTimeout(() => {
+        triggerLocalNotification();
+        statusDiv.innerText = "Scheduled notification sent!";
+      }, delayMs);
+    }
+
     enableBtn.addEventListener('click', () => {
-      // 1. First request standard browser permission
       if (!("Notification" in window)) {
         alert("This browser does not support notifications.");
         return;
@@ -199,25 +218,15 @@
         if (permission === "granted") {
           enableBtn.style.display = 'none';
 
-          // 2. Register device with OneSignal SDK
           window.OneSignalDeferred.push(async function(OneSignal) {
             try {
               await OneSignal.Notifications.requestPermission();
             } catch(e) {
-              console.log("OneSignal registration error:", e);
+              console.log("OneSignal error:", e);
             }
           });
 
-          // 3. Handle Test Mode / Production status
-          if (IS_TEST_MODE) {
-            statusDiv.innerText = "Test Mode: Notification coming in 5 seconds...";
-            setTimeout(() => {
-              triggerLocalNotification();
-              statusDiv.innerText = "Test notification sent!";
-            }, 5000);
-          } else {
-            statusDiv.innerText = "Notifications enabled successfully! You're all set.";
-          }
+          startTimer();
 
         } else {
           statusDiv.style.color = "#d63031";
