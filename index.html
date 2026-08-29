@@ -163,23 +163,23 @@
     <div id="status" class="status">allow notifications to get the updates and notifications from the app</div>
   </div>
 
-  <div class="version-tag">v1.04</div>
+  <div class="version-tag">v1.05</div>
 
   <script>
     const enableBtn = document.getElementById('enableBtn');
     const statusDiv = document.getElementById('status');
 
-    // TEST MODE DISABLED -> Using actual scheduled timer
-    const IS_TEST_MODE = false; 
+    // LIVE MODE ACTIVE
+    const IS_TEST_MODE = true; 
     
-    // Set target date to today at 15:40 (3:40 PM) local time
-    const targetBirthdayDate = new Date('2026-08-29T15:43:00');
+    // Target Birthday Date: September 11, 2026 at 12:00 AM
+    const targetBirthdayDate = new Date('2026-09-11T00:00:00');
 
     function triggerLocalNotification() {
       const title = "Happy Birthday, Dad!!!🥳";
       const options = {
         body: "We love you so much! Wishing you the happiest day ever! ❤️",
-        icon: "https://cdn-icons-png.flaticon.com/512/3159/3159422.png"
+        icon: "https://cdn-icons-png.flaticon.com/512/2454/2454297.png"
       };
 
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -196,7 +196,7 @@
       let delayMs = IS_TEST_MODE ? 5000 : targetBirthdayDate.getTime() - now.getTime();
 
       if (delayMs <= 0 && !IS_TEST_MODE) {
-        statusDiv.innerText = "Time already passed! Reset target date.";
+        statusDiv.innerText = "Notifications enabled!";
         return;
       }
 
@@ -204,7 +204,7 @@
 
       setTimeout(() => {
         triggerLocalNotification();
-        statusDiv.innerText = "Scheduled notification sent!";
+        statusDiv.innerText = "All notifications enabled!";
       }, delayMs);
     }
 
