@@ -10,7 +10,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Surprised">
 
-  <!-- OneSignal SDK -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -158,44 +157,12 @@
     const enableBtn = document.getElementById('enableBtn');
     const statusDiv = document.getElementById('status');
 
-    // -------------------------------------------------------------
-    // TEST MODE CONFIGURATION:
-    // Set to 'true' to test a 5-second popup notification right now.
-    // Set to 'false' before giving the final website to your dad!
-    // -------------------------------------------------------------
-    const IS_TEST_MODE = true; 
-
-    function triggerTestNotification() {
-      const title = "Happy Birthday, Dad!!!🥳";
-      const options = {
-        body: "We love you so much! Wishing you the happiest day ever! ❤️",
-        icon: "https://cdn-icons-png.flaticon.com/512/3159/3159422.png"
-      };
-
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.ready.then(reg => {
-          reg.showNotification(title, options);
-        });
-      } else {
-        new Notification(title, options);
-      }
-    }
-
     enableBtn.addEventListener('click', () => {
       window.OneSignalDeferred.push(async function(OneSignal) {
         try {
           await OneSignal.Notifications.requestPermission();
           enableBtn.style.display = 'none';
-
-          if (IS_TEST_MODE) {
-            statusDiv.innerText = "Test Mode Active: Notification coming in 5 seconds...";
-            setTimeout(() => {
-              triggerTestNotification();
-              statusDiv.innerText = "Test notification sent! (Change IS_TEST_MODE to false for live setup)";
-            }, 5000);
-          } else {
-            statusDiv.innerText = "Notifications enabled successfully! You're all set.";
-          }
+          statusDiv.innerText = "Notifications enabled successfully! You're all set.";
         } catch(e) {
           statusDiv.innerText = "Error enabling notifications. Please try again.";
         }
