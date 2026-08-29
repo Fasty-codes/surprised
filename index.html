@@ -10,6 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Surprised">
 
+  <!-- OneSignal SDK -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -163,32 +164,40 @@
     <div id="status" class="status">allow notifications to get the updates and notifications from the app</div>
   </div>
 
-  <div class="version-tag">v1.05</div>
+  <div class="version-tag">v1.06</div>
 
   <script>
     const enableBtn = document.getElementById('enableBtn');
     const statusDiv = document.getElementById('status');
 
-    // LIVE MODE ACTIVE
+    // -------------------------------------------------------------
+    // Set IS_TEST_MODE to true to test 5-second delay on Android
+    // -------------------------------------------------------------
     const IS_TEST_MODE = true; 
-    
-    // Target Birthday Date: September 11, 2026 at 12:00 AM
     const targetBirthdayDate = new Date('2026-09-11T00:00:00');
 
-    function triggerLocalNotification() {
+    async function sendNotificationViaServiceWorker() {
       const title = "Happy Birthday, Dad!!!🥳";
       const options = {
         body: "We love you so much! Wishing you the happiest day ever! ❤️",
-        icon: "https://cdn-icons-png.flaticon.com/512/2454/2454297.png"
+        icon: "https://cdn-icons-png.flaticon.com/512/2454/2454297.png",
+        badge: "https://cdn-icons-png.flaticon.com/512/2454/2454297.png",
+        vibrate: [200, 100, 200],
+        tag: "bday-notification"
       };
 
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.ready.then(reg => {
-          reg.showNotification(title, options);
-        });
-      } else {
-        new Notification(title, options);
+      if ('serviceWorker' in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          await registration.showNotification(title, options);
+          return true;
+        } catch (err) {
+          console.log("Service Worker notification error:", err);
+        }
       }
+      
+      // Fallback to standard web notification
+      new Notification(title, options);
     }
 
     function startTimer() {
@@ -200,39 +209,45 @@
         return;
       }
 
-      statusDiv.innerText = "Notifications enabled successfully! You're all set.";
+      if (IS_TEST_MODE) {
+        statusDiv.innerText = "Test Mode: Close/minimize Chrome now! Notification comes in 5s...";
+      } else {
+        statusDiv.innerText = "Notifications enabled successfully! You're all set.";
+      }
 
-      setTimeout(() => {
-        triggerLocalNotification();
-        statusDiv.innerText = "All notifications enabled!";
+      setTimeout(async () => {
+        await sendNotificationViaServiceWorker();
+        if (IS_TEST_MODE) {
+          statusDiv.innerText = "Test notification sent!";
+        }
       }, delayMs);
     }
 
-    enableBtn.addEventListener('click', () => {
+    enableBtn.addEventListener('click', async () => {
       if (!("Notification" in window)) {
         alert("This browser does not support notifications.");
         return;
       }
 
-      Notification.requestPermission().then((permission) => {
-        if (permission === "granted") {
-          enableBtn.style.display = 'none';
+      const permission = await Notification.requestPermission();
 
-          window.OneSignalDeferred.push(async function(OneSignal) {
-            try {
-              await OneSignal.Notifications.requestPermission();
-            } catch(e) {
-              console.log("OneSignal error:", e);
-            }
-          });
+      if (permission === "granted") {
+        enableBtn.style.display = 'none';
 
-          startTimer();
+        // Register device with OneSignal
+        window.OneSignalDeferred.push(async function(OneSignal) {
+          try {
+            await OneSignal.Notifications.requestPermission();
+          } catch(e) {
+            console.log("OneSignal error:", e);
+          }
+        });
 
-        } else {
-          statusDiv.style.color = "#d63031";
-          statusDiv.innerText = "Permission required to receive notifications.";
-        }
-      });
+        startTimer();
+      } else {
+        statusDiv.style.color = "#d63031";
+        statusDiv.innerText = "Permission required to receive notifications.";
+      }
     });
   </script>
 </body>
